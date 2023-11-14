@@ -1,4 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:quiz_app_flutter/view/history.dart';
 import 'package:quiz_app_flutter/view/homepage.dart';
 import 'package:quiz_app_flutter/view/quizpage.dart';
@@ -11,18 +14,30 @@ class CategoryPage extends StatefulWidget {
   State<CategoryPage> createState() => _CategoryPageState();
 }
 
-prefsClear() async {
+GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
+FirebaseAuth _auth = FirebaseAuth.instance;
+final CollectionReference user = FirebaseFirestore.instance.collection('user');
+
+void logout(BuildContext context) async {
   final prefrs = await SharedPreferences.getInstance();
   prefrs.clear();
+  await _auth.signOut();
+  await _googleSignIn.signOut();
+  print('signed out');
+  Navigator.of(context).pushAndRemoveUntil(
+    MaterialPageRoute(builder: (context) => HomePage()),
+    (route) => false,
+  );
 }
 
 class _CategoryPageState extends State<CategoryPage> {
   @override
   void initState() {
-    super.initState();
     getIntValuesSF();
     markTransfer();
     totalMark();
+
+    super.initState();
   }
 
   CategoryPage obj = CategoryPage();
@@ -35,7 +50,7 @@ class _CategoryPageState extends State<CategoryPage> {
   getIntValuesSF() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     markfromSP = await prefs.getInt('intMark') ?? 0;
-
+    setState(() {});
   }
 
   totalMark() {
@@ -47,12 +62,11 @@ class _CategoryPageState extends State<CategoryPage> {
     return (totalMarks.toString());
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     // totalMark();
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       endDrawer: Drawer(
         child: ListView(
           children: [
@@ -89,10 +103,7 @@ class _CategoryPageState extends State<CategoryPage> {
               leading: Icon(Icons.exit_to_app),
               title: Text('Logout'),
               onTap: () {
-                prefsClear();
-                Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (context) => HomePage()),
-                    (route) => false);
+                logout(context);
               },
             ),
           ],
@@ -150,7 +161,6 @@ class _CategoryPageState extends State<CategoryPage> {
                 ),
                 InkWell(
                   onTap: () {
-               
                     print('Hi saleel');
                   },
                   child: Container(
@@ -177,54 +187,55 @@ class _CategoryPageState extends State<CategoryPage> {
                 print('on pressed');
               },
               child: Container(
-                  height: 80,
-                  width: MediaQuery.of(context).size.width,
-                  decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black12,
-                          spreadRadius: 5,
-                          blurRadius: 7,
-                          offset: Offset(0, 3),
-                        ),
-                      ],
-                      color: Colors.orange[300],
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Container(
-                        child: Text('Current\nScore',
-                            style: TextStyle(
-                                fontSize: 25,
-                                color: Color.fromARGB(255, 7, 57, 73))),
-                      ),
-                      Container(
-                        child: Text(markfromSP.toString(),
-                            style: TextStyle(
-                                fontSize: 35,
-                                color: Color.fromARGB(255, 7, 57, 73))),
-                      ),
-                      VerticalDivider(
-                        thickness: 1,
-                        indent: 20,
-                        endIndent: 20,
-                        color: Color.fromARGB(255, 7, 57, 73),
-                      ),
-                      Container(
-                        child: Text('Total \nScore',
-                            style: TextStyle(
-                                fontSize: 25,
-                                color: Color.fromARGB(255, 7, 57, 73))),
-                      ),
-                      Container(
-                        child: Text(totalMark(),
-                            style: TextStyle(
-                                fontSize: 35,
-                                color: Color.fromARGB(255, 7, 57, 73))),
+                height: 80,
+                width: MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        spreadRadius: 5,
+                        blurRadius: 7,
+                        offset: Offset(0, 3),
                       ),
                     ],
-                  )),
+                    color: Colors.orange[300],
+                    borderRadius: BorderRadius.circular(10)),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Container(
+                      child: Text('Current\nScore',
+                          style: TextStyle(
+                              fontSize: 25,
+                              color: Color.fromARGB(255, 7, 57, 73))),
+                    ),
+                    Container(
+                      child: Text(markfromSP.toString(),
+                          style: TextStyle(
+                              fontSize: 35,
+                              color: Color.fromARGB(255, 7, 57, 73))),
+                    ),
+                    VerticalDivider(
+                      thickness: 1,
+                      indent: 20,
+                      endIndent: 20,
+                      color: Color.fromARGB(255, 7, 57, 73),
+                    ),
+                    Container(
+                      child: Text('Total \nScore',
+                          style: TextStyle(
+                              fontSize: 25,
+                              color: Color.fromARGB(255, 7, 57, 73))),
+                    ),
+                    Container(
+                      child: Text(totalMark(),
+                          style: TextStyle(
+                              fontSize: 35,
+                              color: Color.fromARGB(255, 7, 57, 73))),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
           SizedBox(height: 10),
@@ -236,9 +247,11 @@ class _CategoryPageState extends State<CategoryPage> {
                 padding: EdgeInsets.all(13),
                 child: InkWell(
                   onTap: () {
-                    
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => QuizPage(category: names[index])));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                QuizPage(category: names[index])));
                   },
                   child: Container(
                     height: 80,

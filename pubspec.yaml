@@ -40,6 +40,11 @@ dependencies:
   intl: ^0.18.1
   side_sheet: ^1.0.4
   provider: ^6.0.5
+  firebase_core: ^2.21.0
+  google_sign_in: ^6.1.5
+  firebase_auth: ^4.12.1
+  cloud_firestore: ^4.13.0
+  
 
 dev_dependencies:
   flutter_test:

@@ -1,20 +1,30 @@
 //quiz page for showing quiz and options user to select the answer
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app_flutter/provider/provider.dart';
+import 'package:quiz_app_flutter/view/history.dart';
 import 'package:quiz_app_flutter/view/resultpage.dart';
 
 // ignore: must_be_immutable
-class QuizPage extends StatelessWidget {
+class QuizPage extends StatefulWidget {
   var category;
 
   QuizPage({super.key, this.category});
 
- 
+  @override
+  State<QuizPage> createState() => _QuizPageState();
+}
+
+class _QuizPageState extends State<QuizPage> {
+  final CollectionReference user =
+      FirebaseFirestore.instance.collection('user');
+
   @override
   Widget build(BuildContext context) {
-    Provider.of<ProviderUse>(context).categoryChecking(category);
+    Provider.of<ProviderUse>(context).categoryChecking(widget.category);
     final provider = Provider.of<ProviderUse>(context);
     return Scaffold(
       appBar: AppBar(
@@ -63,6 +73,8 @@ class QuizPage extends StatelessWidget {
                       provider.indexAdd();
                     } else {
                       provider.markFunction();
+                      addtoFireStore(
+                          mark: provider.mark, category: widget.category);
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
@@ -105,6 +117,8 @@ class QuizPage extends StatelessWidget {
                       provider.indexAdd();
                     } else {
                       provider.markFunction();
+                      addtoFireStore(
+                          mark: provider.mark, category: widget.category);
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
@@ -147,6 +161,8 @@ class QuizPage extends StatelessWidget {
                       provider.indexAdd();
                     } else {
                       provider.markFunction();
+                      addtoFireStore(
+                          mark: provider.mark, category: widget.category);
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
@@ -190,7 +206,8 @@ class QuizPage extends StatelessWidget {
                       provider.indexAdd();
                     } else {
                       provider.markFunction();
-
+                      addtoFireStore(
+                          mark: provider.mark, category: widget.category);
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
@@ -224,5 +241,19 @@ class QuizPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void addtoFireStore({int? mark, String? category}) {
+    DateTime now = DateTime.now();
+    String formattedDate =
+        DateFormat('yyyy-MM-dd – hh:mm').format(now.toLocal());
+    setState(() {
+      final data = {
+        'mark': mark,
+        'date_time': formattedDate,
+        'category': category
+      };
+      user.add(data);
+    });
   }
 }

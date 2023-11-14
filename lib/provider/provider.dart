@@ -11,13 +11,13 @@ class ProviderUse with ChangeNotifier {
   List questions = [];
 
   categoryChecking(dynamic recieved_category) {
-    if ( recieved_category == 'General Knowledge') {
+    if (recieved_category == 'General Knowledge') {
       questions = general_questions;
-    } else if ( recieved_category == 'Science') {
+    } else if (recieved_category == 'Science') {
       questions = science_questions;
-    } else if ( recieved_category == 'Technology') {
+    } else if (recieved_category == 'Technology') {
       questions = technology_questions;
-    } else if ( recieved_category == 'History') {
+    } else if (recieved_category == 'History') {
       questions = history_questions;
     }
   }
@@ -29,27 +29,27 @@ class ProviderUse with ChangeNotifier {
 
   addMark() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setInt('intMark', mark);
+    await prefs.setInt('intMark', mark);
     print(prefs.getInt('intMark'));
-
-    // prefs.clear();
+    notifyListeners();
   }
 
   updateList() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setStringList('list', marks);
-    // prefs.clear();
+    notifyListeners();
   }
 
   addMarks() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     //Return int
     marksSP = await prefs.getStringList('list') ?? [];
-    // prefs.clear();
+    notifyListeners();
   }
 
   checking() {
     marks.add(mark.toString());
+    notifyListeners();
   }
 
   void markFunction() {
@@ -61,12 +61,13 @@ class ProviderUse with ChangeNotifier {
     notifyListeners();
   }
 
-  List<String> storedTimes = [];
+  List<String> storedTimes=[] ;
   Future<void> loadStoredTimes() async {
     final prefs = await SharedPreferences.getInstance();
     final storedTimesList = prefs.getStringList('storedTimes');
 
     storedTimes = storedTimesList ?? [];
+    print("$storedTimes/////////////////////////////////////////////////////////");
     notifyListeners();
   }
 }

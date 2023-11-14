@@ -1,9 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app_flutter/view/category.dart';
 import 'package:quiz_app_flutter/provider/provider.dart';
 import 'package:quiz_app_flutter/util/quizList.dart';
+import 'package:quiz_app_flutter/view/history.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // ignore: must_be_immutable
@@ -19,6 +21,8 @@ class ResultPage extends StatefulWidget {
 }
 
 class _ResultPageState extends State<ResultPage> {
+  final CollectionReference user =
+      FirebaseFirestore.instance.collection('user');
   int markfromSP = 0;
   @override
   void initState() {
@@ -33,7 +37,7 @@ class _ResultPageState extends State<ResultPage> {
   Future<void> storeTime() async {
     DateTime now = DateTime.now();
     String formattedDate =
-    DateFormat('yyyy-MM-dd – hh:mm').format(now.toLocal());
+        DateFormat('yyyy-MM-dd – hh:mm').format(now.toLocal());
     final prefs = await SharedPreferences.getInstance();
     final storedTimes = prefs.getStringList('storedTimes') ?? [];
     storedTimes.add(formattedDate);
@@ -44,20 +48,21 @@ class _ResultPageState extends State<ResultPage> {
   getIntValuesSF() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     markfromSP = await prefs.getInt('intMark') ?? 0;
-   
+
+    print(prefs.getInt('intMark'));
   }
 
   @override
   Widget build(BuildContext context) {
-
     final provider = Provider.of<ProviderUse>(
       context,
     );
+    Date_time = DateTime.now().toString();
     return Scaffold(
       body: WillPopScope(
         onWillPop: () {
           DateTime now = DateTime.now();
-          if (ctime == null || now.difference(ctime) > Duration(seconds: 2)) {
+          if (ctime == null || now.difference(ctime) > Duration(seconds: 1)) {
             //add duration of press gap
             ctime = now;
             markfromSP = 0;
@@ -114,7 +119,7 @@ class _ResultPageState extends State<ResultPage> {
                     )
                   : Column(
                       children: [
-                        Image.asset('assets/images/lost.png'),
+                        Image.asset('assets/images/lose.jpg'),
                         Text(
                           'score is $markfromSP/5',
                           style: TextStyle(
